@@ -48,7 +48,7 @@
     }
   </style>
   <script>
-    function getPicture() {
+    function getPicture(backend, actions) {
       const canvas = document.createElement("canvas");
       // scale the canvas accordingly
       canvas.width = video.videoWidth;
@@ -61,7 +61,12 @@
       try {
         const response = fetch(window.location.href + "send_image", {
           method: 'POST',
-          body: JSON.stringify({ "image": dataURL.replace(/\s+/g, '') }),
+          body: JSON.stringify(
+            {
+              "image": dataURL.replace(/\s+/g, ''),
+              "actions": actions,
+              "backend": backend
+            }),
           headers: {
             'Content-Type': 'application/json'
           }
@@ -71,10 +76,12 @@
             if (val.code === 0) {
               return;
             }
-            document.getElementById("age").innerText = "Возраст: " + val.age;
-            document.getElementById("dominant_emotion").innerText = "Эмоция: " + val.dominant_emotion;
-            document.getElementById("dominant_race").innerText = "Расса: " + val.dominant_race;
-            document.getElementById("gender").innerText = "Пол: " + val.gender;
+            let a = "age" in actions;
+            console.log({ actions, a });
+            document.getElementById("age").innerText = actions.includes("age") ? "Возраст: " + val.age : "";
+            document.getElementById("dominant_emotion").innerText = actions.includes("emotion") ? "Эмоция: " + val.dominant_emotion : "";
+            document.getElementById("dominant_race").innerText = actions.includes("race") ? "Расса: " + val.dominant_race : "";
+            document.getElementById("gender").innerText = actions.includes("gender") ? "Пол: " + val.gender : "";
           })
         });
       } catch (error) {
@@ -82,37 +89,35 @@
       }
     }
     function sendloop() {
+      var actions = []
       setTimeout(() => {
-        getPicture();
+        var actions = [];
+        var backend = document.getElementById("backend").value;
+        var types = ["age", "gender", "emotion", "race"];
+        for (let i = 0; i < types.length; i++) {
+          if (document.getElementById(types[i] + "Chk").checked == true) {
+            actions.push(types[i]);
+          }
+        }
+        getPicture(backend, actions);
         sendloop();
-      }, 5000)
+        console.log(actions.length)
+      }, (actions.length > 1 ? actions.length * 1000 : 5000))
     }
     function start() {
       var button = document.getElementById("showBtn");
       var showingDataContainer = document.getElementById("showingDataContainer");
       var landing = document.getElementById("landing");
-      // var opacity = 0;
-      // let a = (() => {
-      //   if (opacity < 1) {
-      //     opacity += .1;
-      //     setTimeout(function () { a() }, 100);
-      //   }
-      //   button.style.opacity = opacity;
-      //   landing.style.opacity = opacity;
-      // }
-      // )();
       showingDataContainer.classList.toggle("hide");
-      // button.classList.toggle("hide");
       landing.classList.toggle("hide");
-      // sendloop();
     }
   </script>
 </head>
 
-<body>
+<body class="animate">
   <header id="header" class="header fixed-top">
     <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
-      <a href="index.html" class="logo d-flex align-items-center">
+      <a href="/" class="logo d-flex align-items-center">
         <img src="assets/img/logo.png" alt="">
       </a>
       <nav id="navbar" class="navbar">
@@ -136,6 +141,24 @@
           </h2>
         </div>
         <div id="showingDataContainer" class="col-lg-5 d-flex flex-column justify-content-center hide">
+          <form>
+            <div class="input-group-prepend">
+              <input checked id="ageChk" type="checkbox">
+              <label for="gender">Возраст </label><br>
+              <input checked id="genderChk" type="checkbox">
+              <label for="gender">Пол </label><br>
+              <input checked id="emotionChk" type="checkbox">
+              <label for="emotion">Эмоция </label><br>
+              <input checked id="raceChk" type="checkbox">
+              <label for="race">Расса </label><br>
+              <label for="backend">Обработчик изображения</label>
+              <select name="Модель" id="backend" selected="mediapipe">
+                {% for backend in backends %}
+                <option value="{{backend}}">{{backend}}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </form>
           <h2 id="age">Возраст: определяется...</h2>
           <h2 id="gender">Пол: определяется...</h2>
           <h2 id="dominant_emotion">Эмоция: определяется...</h2>

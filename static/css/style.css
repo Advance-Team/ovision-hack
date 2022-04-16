@@ -12,6 +12,22 @@
   scroll-behavior: smooth;
 }
 
+
+/*анимации*/
+
+.animate{
+  animation: text 2s 1;
+}
+@keyframes text{
+  0%{
+    opacity: 0%;
+  }
+  100%{
+    opacity: 100%;
+  }
+}
+
+
 body {
   font-family: "Open Sans", sans-serif;
   color: #444444;
@@ -2034,3 +2050,4 @@ section {
   font-size: 13px;
   color: #012970;
 }
+
