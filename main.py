@@ -1,15 +1,12 @@
-import codecs
 import base64
 import json
-import os
-import uuid
 import numpy as np
 import face_recognition as fr
 from PIL import Image
 import cv2 as cv
 from deepface import DeepFace
 from datetime import datetime as dt
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory
 backends = ['opencv', 'ssd', 'dlib', 'mtcnn', 'retinaface', 'mediapipe']
 models = ["VGG-Face", "Facenet", "Facenet512", "OpenFace", "DeepFace", "DeepID", "ArcFace", "Dlib"]
 
@@ -17,27 +14,15 @@ app = Flask(__name__)
 global free
 free = True
 
-# def checkFree():
-#     if False in free:
-#         return True
-#     else:
-#         return False
-
-# def freeOneOfThread():
-#     for i in range(len(free) - 1):
-#         if free[i] == False:
-#             free[i] = True
-
-# def bindOneOfThreads():
-#     for i in range(len(free) - 1):
-#         if free[i] == True:
-#             print([free, i])
-#             free[i] = False
+@app.route('/assets/<path:path>')
+def send_report(path):
+    return send_from_directory('static', path)
 
 @app.route('/')
+@app.route('/index.html')
 def index():
     return render_template('index.html')
-
+    
 def archive():
     return render_template('archive.html')
 
@@ -55,7 +40,7 @@ def result():
         free = False
         try:
             result = DeepFace.analyze(
-                small_frame, actions=["age", "gender", "emotion", "race"], detector_backend=backends[5], )
+                small_frame, actions=["age", "gender", "emotion", "race"], detector_backend=backends[5])
         except ValueError:
             free = True
             return jsonify({"err": "No face", "code": 0})

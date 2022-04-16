@@ -1,144 +1,180 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- CSS only -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-    <!--Google Icon Font-->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <!-- JavaScript Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-        crossorigin="anonymous"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <style>
-        #camera {
-            width: inherit;
-            height: inherit;
-        }
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-        .camera-container {
-            height: 100vh;
-            display: flex;
-            align-content: center;
-            flex-direction: column;
-            flex-wrap: nowrap;
-            justify-content: center;
-        }
-    </style>
-    <script lang="javascript">
-        function getPicture() {
-            const canvas = document.createElement("canvas");
-            // scale the canvas accordingly
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            // draw the video at that frame
-            canvas.getContext('2d')
-                .drawImage(video, 0, 0, canvas.width, canvas.height);
-            // convert it to a usable data URL
-            const dataURL = canvas.toDataURL();
-            try {
-                const response = fetch(window.location.href + "send_image", {
-                    method: 'POST',
-                    body: JSON.stringify({ "image": dataURL.replace(/\s+/g, '') }),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }).then((res) => {
-                    res.json().then((val)=>{
-                        console.log(val);
-                        if(val.code === 0){
-                            return;
-                        }
-                        document.getElementById("age").innerText = "Возраст: " + val.age;
-                        document.getElementById("dominant_emotion").innerText = "Эмоция: " + val.dominant_emotion;
-                        document.getElementById("dominant_race").innerText = "Расса: " + val.dominant_race;
-                        document.getElementById("gender").innerText = "Пол: " + val.gender;
-                    })
-                });
-            } catch (error) {
-                console.error('Ошибка:', error);
+  <title>FACE_REV</title>
+  <meta content="" name="description">
+
+  <meta content="" name="keywords">
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link
+    href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+    rel="stylesheet">
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
+  <style>
+    .flex-center-verticaly {
+      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: center;
+    }
+
+    #camera {
+      width: 100%;
+      background: gray;
+      text-align: center;
+    }
+
+    .video {
+      display: block;
+      height: 38vh;
+      width: auto;
+      position: relative;
+    }
+
+    .video-mask {
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .hide {
+      display: none !important;
+    }
+  </style>
+  <script>
+    function getPicture() {
+      const canvas = document.createElement("canvas");
+      // scale the canvas accordingly
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      // draw the video at that frame
+      canvas.getContext('2d')
+        .drawImage(video, 0, 0, canvas.width, canvas.height);
+      // convert it to a usable data URL
+      const dataURL = canvas.toDataURL();
+      try {
+        const response = fetch(window.location.href + "send_image", {
+          method: 'POST',
+          body: JSON.stringify({ "image": dataURL.replace(/\s+/g, '') }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then((res) => {
+          res.json().then((val) => {
+            console.log(val);
+            if (val.code === 0) {
+              return;
             }
-        }
-    </script>
-    <title></title>
+            document.getElementById("age").innerText = "Возраст: " + val.age;
+            document.getElementById("dominant_emotion").innerText = "Эмоция: " + val.dominant_emotion;
+            document.getElementById("dominant_race").innerText = "Расса: " + val.dominant_race;
+            document.getElementById("gender").innerText = "Пол: " + val.gender;
+          })
+        });
+      } catch (error) {
+        console.error('Ошибка:', error);
+      }
+    }
+    function sendloop() {
+      setTimeout(() => {
+        getPicture();
+        sendloop();
+      }, 5000)
+    }
+    function start() {
+      var button = document.getElementById("showBtn");
+      var showingDataContainer = document.getElementById("showingDataContainer");
+      var landing = document.getElementById("landing");
+      // var opacity = 0;
+      // let a = (() => {
+      //   if (opacity < 1) {
+      //     opacity += .1;
+      //     setTimeout(function () { a() }, 100);
+      //   }
+      //   button.style.opacity = opacity;
+      //   landing.style.opacity = opacity;
+      // }
+      // )();
+      showingDataContainer.classList.toggle("hide");
+      // button.classList.toggle("hide");
+      landing.classList.toggle("hide");
+      // sendloop();
+    }
+  </script>
 </head>
 
 <body>
-
-    <!--НАВИГАЦИЯ-->
-
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">FACE-RECOGNITION</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Главная</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="archive.html">Архив</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Проводник</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!--КАМЕРА И ЕЕ ТРАНСЛЯЦИЯ-->
-
-    <div class="container camera-container">
-        <div class="row">
-            <div class="col-lg-10 offset-lg-2">
-                <video onload="" autoplay="true" id="camera">
-                </video>
-                <script lang="javascript">
-                    function sendloop() {
-                        setTimeout(() => {
-                            getPicture();
-                            sendloop();
-                        }, 5000)
-                    }
-
-                    var video = document.querySelector("#camera");
-
-                    if (navigator.mediaDevices.getUserMedia) {
-                        navigator.mediaDevices.getUserMedia({ video: true })
-                            .then(function (stream) {
-                                video.srcObject = stream;
-                                sendloop();
-                            })
-                            .catch(function (err0r) {
-                                console.log("Something went wrong!");
-                            });
-                    }
-                </script>
-                <!-- Primary circle button with ripple effect -->
-                <button onclick="getPicture()" class="btn pmd-btn-fab pmd-ripple-effect btn-primary" type="button"><i
-                        class="material-icons pmd-sm">star</i></button>
-            </div>
-            <div class="col-lg-2">
-                <p id="age"></p>
-                <p id="dominant_emotion"></p>
-                <p id="dominant_race"></p>
-                <p id="gender"></p>
-            </div>
-        </div>
+  <header id="header" class="header fixed-top">
+    <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
+      <a href="index.html" class="logo d-flex align-items-center">
+        <img src="assets/img/logo.png" alt="">
+      </a>
+      <nav id="navbar" class="navbar">
+        <ul>
+        </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav>
     </div>
-    <!-- jQuery before Propeller.js -->
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  </header>
+  <section id="hero" class="hero d-flex align-items-center">
+    <div class="container">
+      <div class="row">
+        <div id="landing" class="col-lg-5 d-flex flex-column justify-content-center">
+          <h1 style="letter-spacing: 0.26em;">FACE REVIEW -</h1>
+          <h2 style="text-align: justify;">
+            идейные соображения высшего порядка, а также дальнейшее развитие различных форм деятельности играет важную
+            роль в формировании форм развития. Равным образом начало повседневной работы по формированию позиции играет
+            важную роль в формировании модели развития. Равным образом постоянный количественный рост и сфера нашей
+            активности обеспечивает широкому кругу (специалистов) участие в формировании направлений прогрессивного
+            развития.
+          </h2>
+        </div>
+        <div id="showingDataContainer" class="col-lg-5 d-flex flex-column justify-content-center hide">
+          <h2 id="age">Возраст: определяется...</h2>
+          <h2 id="gender">Пол: определяется...</h2>
+          <h2 id="dominant_emotion">Эмоция: определяется...</h2>
+          <h2 id="dominant_race">Расса: определяется...</h2>
+        </div>
+        <div class="col-lg-6 hero-img offset-lg-1 flex-center-verticaly">
+          <div class="video-mask">
+            <video autoplay="true" id="camera">
+            </video>
+          </div>
 
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+          <script lang="javascript">
+            var video = document.querySelector("#camera");
+
+            if (navigator.mediaDevices.getUserMedia) {
+              navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function (stream) {
+                  video.srcObject = stream;
+                  sendloop();
+                })
+                .catch(function (err0r) {
+                  console.log("Something went wrong!");
+                });
+            }
+          </script>
+          <div class="text-center text-lg-start"
+            style="display: flex;flex-direction: row;flex-wrap: nowrap;justify-content: center;">
+            <a id="showBtn" onclick="start()" style="margin-top: 30px;"
+              class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center">
+              <span>FACE_REV</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/main.js"></script>
 </body>
 
 </html>
