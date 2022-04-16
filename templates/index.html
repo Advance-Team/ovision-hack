@@ -17,6 +17,7 @@
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
   <style>
     .flex-center-verticaly {
       display: flex;
@@ -25,6 +26,7 @@
       justify-content: center;
     }
 
+    #detection,
     #camera {
       width: 100%;
       background: gray;
@@ -50,13 +52,16 @@
   <script>
     function getPicture(backend, actions) {
       const canvas = document.createElement("canvas");
-      // scale the canvas accordingly
+      const landmarkChk = document.getElementById("landmarkChk").checked;
+      if (landmarkChk) {
+        document.getElementById("detection").classList.toggle("hide", false);
+      } else {
+        document.getElementById("detection").classList.toggle("hide", true);
+      }
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      // draw the video at that frame
       canvas.getContext('2d')
         .drawImage(video, 0, 0, canvas.width, canvas.height);
-      // convert it to a usable data URL
       const dataURL = canvas.toDataURL();
       try {
         const response = fetch(window.location.href + "send_image", {
@@ -65,31 +70,42 @@
             {
               "image": dataURL.replace(/\s+/g, ''),
               "actions": actions,
-              "backend": backend
+              "backend": backend,
+              "landmarks": landmarkChk,
             }),
           headers: {
             'Content-Type': 'application/json'
           }
         }).then((res) => {
           res.json().then((val) => {
-            console.log(val);
+            var noface = document.getElementById("not-find-face");
+            var age = document.getElementById("age");
+            var emotion = document.getElementById("dominant_emotion");
+            var race = document.getElementById("dominant_race");
+            var gender = document.getElementById("gender");
             if (val.code === 0) {
+              if (val.err === "No face")
+                noface.classList.toggle("hide", false);
               return;
             }
-            let a = "age" in actions;
-            console.log({ actions, a });
-            document.getElementById("age").innerText = actions.includes("age") ? "Возраст: " + val.age : "";
-            document.getElementById("dominant_emotion").innerText = actions.includes("emotion") ? "Эмоция: " + val.dominant_emotion : "";
-            document.getElementById("dominant_race").innerText = actions.includes("race") ? "Расса: " + val.dominant_race : "";
-            document.getElementById("gender").innerText = actions.includes("gender") ? "Пол: " + val.gender : "";
+            noface.classList.toggle("hide", true)
+            age.innerText = actions.includes("age") ? "Возраст: " + val.age : "";
+            emotion.innerText = actions.includes("emotion") ? "Эмоция: " + val.dominant_emotion : "";
+            race.innerText = actions.includes("race") ? "Расса: " + val.dominant_race : "";
+            gender.innerText = actions.includes("gender") ? "Пол: " + val.gender : "";
+            if (val.image != undefined) {
+              let img = document.getElementById("detection-container");
+              document.getElementById("detection").src = val.image;
+              img.classList.toggle("hide", false);
+            }
           })
         });
       } catch (error) {
         console.error('Ошибка:', error);
       }
     }
+    var actions = [1, 2, 3, 4]
     function sendloop() {
-      var actions = []
       setTimeout(() => {
         var actions = [];
         var backend = document.getElementById("backend").value;
@@ -102,7 +118,7 @@
         getPicture(backend, actions);
         sendloop();
         console.log(actions.length)
-      }, (actions.length > 1 ? actions.length * 1000 : 5000))
+      }, (actions.length > 1 ? actions.length * 500 : 100))
     }
     function start() {
       var button = document.getElementById("showBtn");
@@ -143,15 +159,79 @@
         <div id="showingDataContainer" class="col-lg-5 d-flex flex-column justify-content-center hide">
           <form>
             <div class="input-group-prepend">
-              <input checked id="ageChk" type="checkbox">
-              <label for="gender">Возраст </label><br>
-              <input checked id="genderChk" type="checkbox">
-              <label for="gender">Пол </label><br>
-              <input checked id="emotionChk" type="checkbox">
-              <label for="emotion">Эмоция </label><br>
-              <input checked id="raceChk" type="checkbox">
-              <label for="race">Расса </label><br>
-              <label for="backend">Обработчик изображения</label>
+              <label for="ageChk" class="checkbox">
+                <input checked class="checkbox__input" id="ageChk" type="checkbox">
+                <!-- готовим виртуальное пространство для рисования -->
+                <svg class="checkbox__icon" viewBox="0 0 22 22">
+                  <!-- рисуем красивую рамку чекбокса -->
+                  <rect width="21" height="21" x=".5" y=".5" fill="#FFF" stroke="#006F94" rx="3" />
+                  <!-- сразу делаем красивую галочку, но пока делаем её невидимой -->
+                  <path class="tick" stroke="#7065FF" fill="none" stroke-linecap="round" stroke-width="4"
+                    d="M4 10l5 5 9-9" />
+                </svg>
+              </label>
+              <label for="ageChk">
+                <h2>Возраст</h2>
+              </label><br>
+              <label for="genderChk" class="checkbox">
+                <input checked class="checkbox__input" id="genderChk" type="checkbox">
+                <!-- готовим виртуальное пространство для рисования -->
+                <svg class="checkbox__icon" viewBox="0 0 22 22">
+                  <!-- рисуем красивую рамку чекбокса -->
+                  <rect width="21" height="21" x=".5" y=".5" fill="#FFF" stroke="#006F94" rx="3" />
+                  <!-- сразу делаем красивую галочку, но пока делаем её невидимой -->
+                  <path class="tick" stroke="#7065FF" fill="none" stroke-linecap="round" stroke-width="4"
+                    d="M4 10l5 5 9-9" />
+                </svg>
+              </label>
+              <label for="gender">
+                <h2>Пол</h2>
+              </label><br>
+              <label for="emotionChk" class="checkbox">
+                <input checked class="checkbox__input" id="emotionChk" type="checkbox">
+                <!-- готовим виртуальное пространство для рисования -->
+                <svg class="checkbox__icon" viewBox="0 0 22 22">
+                  <!-- рисуем красивую рамку чекбокса -->
+                  <rect width="21" height="21" x=".5" y=".5" fill="#FFF" stroke="#006F94" rx="3" />
+                  <!-- сразу делаем красивую галочку, но пока делаем её невидимой -->
+                  <path class="tick" stroke="#7065FF" fill="none" stroke-linecap="round" stroke-width="4"
+                    d="M4 10l5 5 9-9" />
+                </svg>
+              </label>
+              <label for="emotionChk">
+                <h2>Эмоция</h2>
+              </label><br>
+              <label for="raceChk" class="checkbox">
+                <input checked class="checkbox__input" id="raceChk" type="checkbox">
+                <!-- готовим виртуальное пространство для рисования -->
+                <svg class="checkbox__icon" viewBox="0 0 22 22">
+                  <!-- рисуем красивую рамку чекбокса -->
+                  <rect width="21" height="21" x=".5" y=".5" fill="#FFF" stroke="#006F94" rx="3" />
+                  <!-- сразу делаем красивую галочку, но пока делаем её невидимой -->
+                  <path class="tick" stroke="#7065FF" fill="none" stroke-linecap="round" stroke-width="4"
+                    d="M4 10l5 5 9-9" />
+                </svg>
+              </label>
+              <label for="raceChk">
+                <h2>Расса</h2>
+              </label><br>
+              <label for="landmarkChk" class="checkbox">
+                <input checked class="checkbox__input" id="landmarkChk" type="checkbox">
+                <!-- готовим виртуальное пространство для рисования -->
+                <svg class="checkbox__icon" viewBox="0 0 22 22">
+                  <!-- рисуем красивую рамку чекбокса -->
+                  <rect width="21" height="21" x=".5" y=".5" fill="#FFF" stroke="#006F94" rx="3" />
+                  <!-- сразу делаем красивую галочку, но пока делаем её невидимой -->
+                  <path class="tick" stroke="#7065FF" fill="none" stroke-linecap="round" stroke-width="4"
+                    d="M4 10l5 5 9-9" />
+                </svg>
+              </label>
+              <label for="landmarkChk">
+                <h2>Landmarks</h2>
+              </label><br>
+              <label for="backend">
+                <h2>Обработчик изображения</h2>
+              </label>
               <select name="Модель" id="backend" selected="mediapipe">
                 {% for backend in backends %}
                 <option value="{{backend}}">{{backend}}</option>
@@ -163,11 +243,17 @@
           <h2 id="gender">Пол: определяется...</h2>
           <h2 id="dominant_emotion">Эмоция: определяется...</h2>
           <h2 id="dominant_race">Расса: определяется...</h2>
+          <div class="alert alert-warning hide" id="not-find-face" role="alert">
+            Сервер не может обнаружить лицо на изображении
+          </div>
         </div>
         <div class="col-lg-6 hero-img offset-lg-1 flex-center-verticaly">
           <div class="video-mask">
             <video autoplay="true" id="camera">
             </video>
+          </div>
+          <div id="detection-container" class="video-mask hide">
+            <img class="" id="detection">
           </div>
 
           <script lang="javascript">
