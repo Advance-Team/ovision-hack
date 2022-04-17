@@ -1,12 +1,9 @@
 import base64
 from cgitb import small
 import json
-from urllib import response
 from matplotlib.pyplot import get
 import numpy as np
-import face_recognition as fr
 import mediapipe as mp
-from PIL import Image
 import cv2 as cv
 from deepface import DeepFace
 from datetime import datetime as dt
@@ -95,10 +92,6 @@ def facemesh_analyze(image):
             
 
 
-def fr_analyze(image):
-    return fr.face_locations(image)
-
-
 @ app.route('/send_image', methods=['POST'])
 def result():
     global free
@@ -150,4 +143,4 @@ def result():
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=443, ssl_context=(
-        'cert.pem', 'key.pem'),  debug=True)
+        'cert.pem', 'key.pem'), debug=True)

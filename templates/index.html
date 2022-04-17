@@ -18,142 +18,6 @@
   <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/style.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
-  <style>
-    .flex-center-verticaly {
-      display: flex;
-      flex-direction: column;
-      flex-wrap: nowrap;
-      justify-content: center;
-    }
-
-    #detection,
-    #camera {
-      width: 100%;
-      background: gray;
-      text-align: center;
-    }
-
-    .video {
-      display: block;
-      height: 38vh;
-      width: auto;
-      position: relative;
-    }
-
-    .video-mask {
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .hide {
-      display: none !important;
-    }
-  </style>
-  <script>
-    const genderLang = {
-      "Woman": "Женщина", "Man": "Мужчина"
-    }
-    const emotionLang = {
-      'angry': "Злость",
-      'disgust': "Отвращение",
-      'fear': "Страх",
-      'happy': "Радость",
-      'sad': "Грусть",
-      'surprise': "Удивление",
-      'neutral': "Нейтральная"
-  }
-  const raceLang = {
-    "asian": "Азиатская", 
-    "white": "Европеоидная", 
-    "middle eastern": "Восточная", 
-    "indian": "Индийская", 
-    "latino": "Латиноамериканская",
-    "black": "Афроамериканская"
-  }
-    function getPicture(backend, actions) {
-      const canvas = document.createElement("canvas");
-      const landmarkChk = document.getElementById("landmarkChk").checked;
-      const facemeshChk = document.getElementById("facemeshChk").checked;
-      if (landmarkChk || facemeshChk) {
-        document.getElementById("detection").classList.toggle("hide", false);
-      } else {
-        document.getElementById("detection").classList.toggle("hide", true);
-      }
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext('2d')
-        .drawImage(video, 0, 0, canvas.width, canvas.height);
-      const dataURL = canvas.toDataURL();
-      try {
-        const response = fetch(window.location.href + "send_image", {
-          method: 'POST',
-          body: JSON.stringify(
-            {
-              "image": dataURL.replace(/\s+/g, ''),
-              "actions": actions,
-              "backend": backend,
-              "landmarks": landmarkChk,
-              "facemesh": facemeshChk
-            }),
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }).then((res) => {
-          res.json().then((val) => {
-            var noface = document.getElementById("not-find-face");
-            var age = document.getElementById("age");
-            var emotion = document.getElementById("dominant_emotion");
-            var race = document.getElementById("dominant_race");
-            var gender = document.getElementById("gender");
-            if (val.code === 0) {
-              if (val.err === "No face")
-                noface.classList.toggle("hide", false);
-              return;
-            }
-            noface.classList.toggle("hide", true)
-            age.innerText = actions.includes("age") ? "Возраст: " + val.age : "";
-            emotion.innerText = actions.includes("emotion") ? "Эмоция: " + emotionLang[val.dominant_emotion] : "";
-            race.innerText = actions.includes("race") ? "Расса: " + raceLang[val.dominant_race] : "";
-            gender.innerText = actions.includes("gender") ? "Пол: " + genderLang[val.gender] : "";
-            if (val.image != undefined) {
-              let img = document.getElementById("detection-container");
-              document.getElementById("detection").src = val.image;
-              img.classList.toggle("hide", false);
-            }
-          })
-        });
-      } catch (error) {
-        console.error('Ошибка:', error);
-      }
-    }
-    var actions = [1, 2, 3, 4]
-    function sendloop() {
-      setTimeout(() => {
-        var actions = [];
-        var backend = document.getElementById("backend").value;
-        var types = ["age", "gender", "emotion", "race"];
-        for (let i = 0; i < types.length; i++) {
-          if (document.getElementById(types[i] + "Chk").checked == true) {
-            actions.push(types[i]);
-          }
-        }
-        getPicture(backend, actions);
-        sendloop();
-        console.log(actions.length)
-      }, (actions.length > 1 ? actions.length * 500 : 50))
-    }
-    function start() {
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-      var button = document.getElementById("showBtn");
-      var showingDataContainer = document.getElementById("showingDataContainer");
-      var landing = document.getElementById("landing");
-      showingDataContainer.classList.toggle("hide");
-      landing.classList.toggle("hide");
-    }
-  </script>
 </head>
 
 <body class="animate">
@@ -181,91 +45,104 @@
           </h2>
         </div>
         <div id="showingDataContainer" class="col-lg-5 d-flex flex-column justify-content-center hide">
+          <h1 class="justify-content-center">Параметры</h1>
           <form>
-            <div class="input-group-prepend">
-              <label for="ageChk" class="checkbox">
-                <input checked class="checkbox__input" id="ageChk" type="checkbox">
-                <svg class="checkbox__icon" viewBox="0 0 22 22">
-                  <rect width="21" height="21" x=".5" y=".5" fill="#FFF" stroke="#006F94" rx="3" />
-                  <path class="tick" stroke="#7065FF" fill="none" stroke-linecap="round" stroke-width="4"
-                    d="M4 10l5 5 9-9" />
-                </svg>
-              </label>
-              <label for="ageChk">
-                <h2>Возраст</h2>
-              </label><br>
-              <label for="genderChk" class="checkbox">
-                <input checked class="checkbox__input" id="genderChk" type="checkbox">
-                <svg class="checkbox__icon" viewBox="0 0 22 22">
-                  <rect width="21" height="21" x=".5" y=".5" fill="#FFF" stroke="#006F94" rx="3" />
-                  <path class="tick" stroke="#7065FF" fill="none" stroke-linecap="round" stroke-width="4"
-                    d="M4 10l5 5 9-9" />
-                </svg>
-              </label>
-              <label for="gender">
-                <h2>Пол</h2>
-              </label><br>
-              <label for="emotionChk" class="checkbox">
-                <input checked class="checkbox__input" id="emotionChk" type="checkbox">
-                <svg class="checkbox__icon" viewBox="0 0 22 22">
-                  <rect width="21" height="21" x=".5" y=".5" fill="#FFF" stroke="#006F94" rx="3" />
-                  <path class="tick" stroke="#7065FF" fill="none" stroke-linecap="round" stroke-width="4"
-                    d="M4 10l5 5 9-9" />
-                </svg>
-              </label>
-              <label for="emotionChk">
-                <h2>Эмоция</h2>
-              </label><br>
-              <label for="raceChk" class="checkbox">
-                <input checked class="checkbox__input" id="raceChk" type="checkbox">
-                <svg class="checkbox__icon" viewBox="0 0 22 22">
-                  <rect width="21" height="21" x=".5" y=".5" fill="#FFF" stroke="#006F94" rx="3" />
-                  <path class="tick" stroke="#7065FF" fill="none" stroke-linecap="round" stroke-width="4"
-                    d="M4 10l5 5 9-9" />
-                </svg>
-              </label>
-              <label for="raceChk">
-                <h2>Расса</h2>
-              </label><br>
-              <label for="landmarkChk" class="checkbox">
-                <input class="checkbox__input" id="landmarkChk" type="checkbox">
-                <svg class="checkbox__icon" viewBox="0 0 22 22">
-                  <rect width="21" height="21" x=".5" y=".5" fill="#FFF" stroke="#006F94" rx="3" />
-                  <path class="tick" stroke="#7065FF" fill="none" stroke-linecap="round" stroke-width="4"
-                    d="M4 10l5 5 9-9" />
-                </svg>
-              </label>
-              <label for="landmarkChk">
-                <h2>Landmarks</h2>
-              </label><br>
-              <label for="facemeshChk" class="checkbox">
-                <input class="checkbox__input" id="facemeshChk" type="checkbox">
-                <svg class="checkbox__icon" viewBox="0 0 22 22">
-                  <rect width="21" height="21" x=".5" y=".5" fill="#FFF" stroke="#006F94" rx="3" />
-                  <path class="tick" stroke="#7065FF" fill="none" stroke-linecap="round" stroke-width="4"
-                    d="M4 10l5 5 9-9" />
-                </svg>
-              </label>
-              <label for="facemeshChk">
-                <h2>Сетка</h2>
-              </label><br>
+            <div class="">
+              <div class="row">
+                <div class="col-lg-5 flex-column">
+                  <div class="input-group-prepend">
+                    <label for="ageChk" class="checkbox">
+                      <input checked class="checkbox__input" id="ageChk" type="checkbox">
+                      <svg class="checkbox__icon" viewBox="0 0 22 22">
+                        <rect width="21" height="21" x=".5" y=".5" fill="#FFF" stroke="#006F94" rx="3" />
+                        <path class="tick" stroke="#7065FF" fill="none" stroke-linecap="round" stroke-width="4"
+                          d="M4 10l5 5 9-9" />
+                      </svg>
+                    </label>
+                    <label for="ageChk">
+                      <h2> Возраст</h2>
+                    </label><br>
+                    <label for="genderChk" class="checkbox">
+                      <input checked class="checkbox__input" id="genderChk" type="checkbox">
+                      <svg class="checkbox__icon" viewBox="0 0 22 22">
+                        <rect width="21" height="21" x=".5" y=".5" fill="#FFF" stroke="#006F94" rx="3" />
+                        <path class="tick" stroke="#7065FF" fill="none" stroke-linecap="round" stroke-width="4"
+                          d="M4 10l5 5 9-9" />
+                      </svg>
+                    </label>
+                    <label for="gender">
+                      <h2> Пол</h2>
+                    </label><br>
+                    <label for="emotionChk" class="checkbox">
+                      <input checked class="checkbox__input" id="emotionChk" type="checkbox">
+                      <svg class="checkbox__icon" viewBox="0 0 22 22">
+                        <rect width="21" height="21" x=".5" y=".5" fill="#FFF" stroke="#006F94" rx="3" />
+                        <path class="tick" stroke="#7065FF" fill="none" stroke-linecap="round" stroke-width="4"
+                          d="M4 10l5 5 9-9" />
+                      </svg>
+                    </label>
+                    <label for="emotionChk">
+                      <h2> Эмоция</h2>
+                    </label><br>
+                    <label for="raceChk" class="checkbox">
+                      <input checked class="checkbox__input" id="raceChk" type="checkbox">
+                      <svg class="checkbox__icon" viewBox="0 0 22 22">
+                        <rect width="21" height="21" x=".5" y=".5" fill="#FFF" stroke="#006F94" rx="3" />
+                        <path class="tick" stroke="#7065FF" fill="none" stroke-linecap="round" stroke-width="4"
+                          d="M4 10l5 5 9-9" />
+                      </svg>
+                    </label>
+                    <label for="raceChk">
+                      <h2> Расса</h2>
+                    </label><br>
+                  </div>
+                </div>
+                <div class="col-lg-5 flex-column">
+                  <label for="landmarkChk" class="checkbox">
+                    <input class="checkbox__input" id="landmarkChk" type="checkbox">
+                    <svg class="checkbox__icon" viewBox="0 0 22 22">
+                      <rect width="21" height="21" x=".5" y=".5" fill="#FFF" stroke="#006F94" rx="3" />
+                      <path class="tick" stroke="#7065FF" fill="none" stroke-linecap="round" stroke-width="4"
+                        d="M4 10l5 5 9-9" />
+                    </svg>
+                  </label>
+                  <label for="landmarkChk">
+                    <h2> Landmarks</h2>
+                  </label><br>
+                  <label for="facemeshChk" class="checkbox">
+                    <input class="checkbox__input" id="facemeshChk" type="checkbox">
+                    <svg class="checkbox__icon" viewBox="0 0 22 22">
+                      <rect width="21" height="21" x=".5" y=".5" fill="#FFF" stroke="#006F94" rx="3" />
+                      <path class="tick" stroke="#7065FF" fill="none" stroke-linecap="round" stroke-width="4"
+                        d="M4 10l5 5 9-9" />
+                    </svg>
+                  </label>
+                  <label for="facemeshChk">
+                    <h2> Сетка</h2>
+                  </label><br>
+                </div>
+              </div>
               <label for="backend">
                 <h2>Обработчик изображения</h2>
               </label>
-              <select name="Модель" id="backend" selected="mediapipe">
-                {% for backend in backends %}
-                <option value="{{backend}}">{{backend}}</option>
-                {% endfor %}
-              </select>
+              <div class="div selectWrapper">
+                <select name="Модель" id="backend" selected="mediapipe" class="selectBox">
+                  {% for backend in backends %}
+                  <option value="{{backend}}">{{backend}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div><br>
+            <div id="result" class="row alert alert-secondary">
+              <h2 id="age">Возраст: определяется...</h2>
+              <h2 id="gender">Пол: определяется...</h2>
+              <h2 id="dominant_emotion">Эмоция: определяется...</h2>
+              <h2 id="dominant_race">Расса: определяется...</h2>
+              <div class="alert alert-warning hide" id="not-find-face" role="alert">
+                Сервер не может обнаружить лицо на изображении
+              </div>
             </div>
           </form>
-          <h2 id="age">Возраст: определяется...</h2>
-          <h2 id="gender">Пол: определяется...</h2>
-          <h2 id="dominant_emotion">Эмоция: определяется...</h2>
-          <h2 id="dominant_race">Расса: определяется...</h2>
-          <div class="alert alert-warning hide" id="not-find-face" role="alert">
-            Сервер не может обнаружить лицо на изображении
-          </div>
         </div>
         <div class="col-lg-6 hero-img offset-lg-1 flex-center-verticaly">
           <div class="video-mask">
@@ -278,7 +155,6 @@
 
           <script lang="javascript">
             var video = document.querySelector("#camera");
-
             if (navigator.mediaDevices.getUserMedia) {
               navigator.mediaDevices.getUserMedia({ video: true })
                 .then(function (stream) {
