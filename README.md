@@ -19,3 +19,13 @@ pip3 -r requirements.txt
 ```sh
 FLASK_APP=main.py flask run -p 443
 ```
+
+## Скриншоты
+Главный экран:
+![index](https://github.com/Advance-Team/ovision-hack/raw/main/screenshots/1.png "index")
+
+Распознавание по моделям:
+![Распознавание по моделям](https://github.com/Advance-Team/ovision-hack/raw/main/screenshots/2.png "Распознавание по моделям")
+
+Face-Mash:
+![Face-Mash](https://github.com/Advance-Team/ovision-hack/raw/main/screenshots/3.png "Face-Mash")
