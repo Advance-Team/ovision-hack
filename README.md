@@ -1,4 +1,4 @@
-# ovision-hack
+# Face-Rev
 Проект, разработанный на хакатоне от [OVISION Hack](https://hack.ovision.ru/)
 ## Установка
 Для установки, склонируйте репозиторий
